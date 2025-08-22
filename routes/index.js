@@ -1,13 +1,18 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 
-require('../models/connection');
-const Place = require('../models/places');
-const { checkBody } = require('../modules/checkBody');
+require("../models/connection");
+const Place = require("../models/places");
+const { checkBody } = require("../modules/checkBody");
 
-router.post('/places', (req, res) => {
-  if (!checkBody(req.body, ['nickname', 'name', 'latitude', 'longitude'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
+//verif connexion backend
+router.get("/", (req, res) => {
+  res.json({ message: "Backend is up!" });
+});
+
+router.post("/places", (req, res) => {
+  if (!checkBody(req.body, ["nickname", "name", "latitude", "longitude"])) {
+    res.json({ result: false, error: "Missing or empty fields" });
     return;
   }
 
@@ -19,27 +24,32 @@ router.post('/places', (req, res) => {
   });
 });
 
-router.get('/places/:nickname', (req, res) => {
+router.get("/places/:nickname", (req, res) => {
   // Regex to find places regardless of nickname case
-  Place.find({ nickname: { $regex: new RegExp(req.params.nickname, 'i') } }).then(data => {
-      res.json({ result: true, places: data });
+  Place.find({
+    nickname: { $regex: new RegExp(req.params.nickname, "i") },
+  }).then((data) => {
+    res.json({ result: true, places: data });
   });
 });
 
-router.delete('/places', (req, res) => {
-  if (!checkBody(req.body, ['nickname', 'name'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
+router.delete("/places", (req, res) => {
+  if (!checkBody(req.body, ["nickname", "name"])) {
+    res.json({ result: false, error: "Missing or empty fields" });
     return;
   }
 
   const { nickname, name } = req.body;
 
   // Regex to delete place regardless of nickname case
-  Place.deleteOne({ nickname: { $regex: new RegExp(nickname, 'i') }, name }).then((deletedDoc) => {
+  Place.deleteOne({
+    nickname: { $regex: new RegExp(nickname, "i") },
+    name,
+  }).then((deletedDoc) => {
     if (deletedDoc.deletedCount > 0) {
       res.json({ result: true });
     } else {
-      res.json({ result: false, error: 'Place not found' });
+      res.json({ result: false, error: "Place not found" });
     }
   });
 });
